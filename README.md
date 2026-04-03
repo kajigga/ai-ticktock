@@ -13,18 +13,22 @@ skill/       Claude Code skill files (SKILL.md, export script, Swift calendar he
 
 The `time-entry` Claude Code skill drives everything. You talk to Claude; Claude calls the `timetracker` binary to read and write a local JSON file. The binary is the only thing that touches data — Claude never guesses IDs or formats dates.
 
+## Setup
+
+`~/.claude/skills/time-entry` should be a symlink to this repo's `skill/` directory:
+
+```bash
+ln -s ~/dev/ai-ticktock/skill ~/.claude/skills/time-entry
+```
+
 ## Building the binary
 
 ```bash
 cd go-src
-go build -o ~/.claude/skills/time-entry/timetracker .
+go build -o ../skill/timetracker .
 ```
 
-The binary must live at `~/.claude/skills/time-entry/timetracker` for the skill to find it.
-
-## Installing the skill
-
-Copy `skill/SKILL.md` to `~/.claude/skills/time-entry/SKILL.md` and register it in your Claude Code user settings.
+The binary is gitignored and lives in `skill/` (which Claude Code sees via the symlink).
 
 ## Commands
 
