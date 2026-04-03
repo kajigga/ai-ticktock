@@ -3,6 +3,9 @@ go-src/timetracker
 skill/timetracker
 skill/pull_calendar
 
+# Release artifacts
+*.tar.gz
+
 # macOS
 .DS_Store
 
