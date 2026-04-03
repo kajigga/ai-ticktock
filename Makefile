@@ -12,7 +12,7 @@ build:
 test:
 	cd $(GODIR) && go test ./...
 
-## Developer install: build + symlink skill/ as the Claude Code skill dir
+## Developer install: build + symlink skill/ into Claude Code (and opencode if installed)
 install: build
 	@bash install.sh --dev
 

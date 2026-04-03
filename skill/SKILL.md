@@ -19,8 +19,8 @@ Add, view, report on, and export time entries via the `timetracker` Go binary at
 
 ## Config & Data Files
 - **Config**: `~/.config/timetracker.json`
-  - `data_file`: path to the entries JSON file — **must be inside OneDrive**
-  - `backup_file`: path to the daily .zip backup — **must also be inside OneDrive**
+  - `data_file`: path to the entries JSON file
+  - `backup_file`: path to the daily .zip backup
   - `accounts`: list of known project accounts
   - `spreadsheet_file`: path to the Excel timesheet (optional, set on first export)
   - `last_backup_date`: tracks when the last backup ran (managed automatically)
@@ -49,21 +49,19 @@ Do not proceed if the binary is unavailable.
 test -f ~/.config/timetracker.json && echo "exists" || echo "missing"
 ```
 
-**If missing**, detect OneDrive and ask for paths:
+**If missing**, ask the user where to store their data. Optionally detect OneDrive to offer as a suggestion:
 
 ```bash
 ls -d ~/Library/CloudStorage/OneDrive-*/ 2>/dev/null | head -1
 ```
 
-Use the detected path to suggest defaults, then ask:
-> "Where should your time entries file be stored?
-> Recommended (OneDrive): [DETECTED_ONEDRIVE_PATH]timetracker/entries.json
-> Enter path or press enter to use recommended:"
+Ask the user:
+> "Where should your time entries file be stored? (e.g. ~/Documents/timetracker/entries.json)
+> Tip: storing it in OneDrive keeps it backed up and synced across machines — [DETECTED_ONEDRIVE_PATH]timetracker/entries.json is a good choice if you use OneDrive."
 
-> "Where should daily backups be saved?
-> Recommended: [DETECTED_ONEDRIVE_PATH]timetracker/backups/entries-backup.zip"
+> "Where should daily backups be saved? (e.g. ~/Documents/timetracker/backups/entries-backup.zip)"
 
-**Important:** Both paths should be inside OneDrive so data is cloud-synced and protected.
+If OneDrive was not detected, omit the OneDrive tip. Accept any path the user provides — do not require or default to OneDrive.
 
 Then create config and data file:
 
