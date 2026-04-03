@@ -956,8 +956,15 @@ Read all entries for the week including their `notes` fields. Write a single nat
 
 ### Step 3: Build and open the draft
 
-Replace all caps placeholders (WEEK_START, BOSS_EMAIL, SUMMARY, MAIL_APP) with real values:
+Replace WEEK_START, BOSS_EMAIL, and SUMMARY with real values:
 
+```bash
+python3 ~/.claude/skills/time-entry/email_report.py WEEK_START BOSS_EMAIL "SUMMARY"
+```
+
+The script reads config, builds the HTML email, and opens a draft in the configured mail app.
+
+<!-- legacy heredoc kept for reference only — use email_report.py above instead -->
 ```bash
 python3 << 'EOF'
 import json, os, subprocess, tempfile
