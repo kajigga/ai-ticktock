@@ -40,20 +40,11 @@ ARCH=$(uname -m)
 [[ "$ARCH" == "arm64" ]] && ASSET="time-entry-skill-darwin-arm64.tar.gz" \
                           || ASSET="time-entry-skill-darwin-amd64.tar.gz"
 
-info "Fetching latest release ($ARCH)..."
-URL=$(python3 - <<PYEOF
-import json, urllib.request
-data = json.load(urllib.request.urlopen("https://api.github.com/repos/$REPO/releases/latest"))
-hits = [a["browser_download_url"] for a in data.get("assets", []) if a["name"] == "$ASSET"]
-print(hits[0] if hits else "")
-PYEOF
-)
-
-[[ -z "$URL" ]] && die "No release found for $ASSET. Has a release been published?"
+URL="https://github.com/$REPO/releases/latest/download/$ASSET"
 
 TMP=$(mktemp -d); trap "rm -rf $TMP" EXIT
-info "Downloading..."
-curl -fsSL "$URL" -o "$TMP/skill.tar.gz"
+info "Downloading latest release ($ARCH)..."
+curl -fsSL "$URL" -o "$TMP/skill.tar.gz" || die "Download failed. Has a release been published?"
 tar -xzf "$TMP/skill.tar.gz" -C "$TMP"
 
 [[ -e "$SKILL_DIR" ]] && warn "Replacing existing install."
