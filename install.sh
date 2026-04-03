@@ -90,14 +90,19 @@ if command -v go &>/dev/null; then
 fi
 
 # No Go — download latest GitHub release tarball
-info "Fetching latest release info..."
-RELEASE_URL=$(python3 - <<'PYEOF'
-import json, urllib.request, sys
+ARCH=$(uname -m)
+[[ "$ARCH" == "arm64" ]] && TARBALL_NAME="time-entry-skill-darwin-arm64.tar.gz" \
+                          || TARBALL_NAME="time-entry-skill-darwin-amd64.tar.gz"
+
+info "Fetching latest release info (arch: $ARCH)..."
+RELEASE_URL=$(python3 - "$TARBALL_NAME" <<'PYEOF'
+import json, sys, urllib.request
+name = sys.argv[1]
 try:
     url = "https://api.github.com/repos/kajigga/ai-ticktock/releases/latest"
     data = json.load(urllib.request.urlopen(url))
     assets = [a["browser_download_url"] for a in data.get("assets", [])
-              if a["name"].endswith(".tar.gz")]
+              if a["name"] == name]
     print(assets[0] if assets else "")
 except Exception as e:
     sys.exit(f"GitHub API error: {e}")

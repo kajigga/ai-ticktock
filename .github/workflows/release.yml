@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go-src/go.mod
+
+      - name: Build arm64
+        run: cd go-src && GOARCH=arm64 GOOS=darwin go build -o ../skill/timetracker .
+
+      - name: Package arm64
+        run: |
+          tar -czf time-entry-skill-darwin-arm64.tar.gz \
+            -C skill SKILL.md export.py tt.py pull_calendar.swift timetracker
+
+      - name: Build amd64
+        run: cd go-src && GOARCH=amd64 GOOS=darwin go build -o ../skill/timetracker .
+
+      - name: Package amd64
+        run: |
+          tar -czf time-entry-skill-darwin-amd64.tar.gz \
+            -C skill SKILL.md export.py tt.py pull_calendar.swift timetracker
+
+      - name: Run tests
+        run: cd go-src && go test ./...
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            time-entry-skill-darwin-arm64.tar.gz \
+            time-entry-skill-darwin-amd64.tar.gz \
+            --title "${{ github.ref_name }}" \
+            --notes "Install:
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/kajigga/ai-ticktock/main/install.sh | bash
+          \`\`\`"
