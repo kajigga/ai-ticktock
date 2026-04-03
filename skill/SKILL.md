@@ -258,18 +258,28 @@ Keep this list in mind for Step 4 deduplication.
 
 ### Step 3: Pull from Calendar.app
 
-> **Performance note:** Uses a pre-compiled Swift + EventKit binary stored at `~/.claude/skills/time-entry/pull_calendar`. EventKit does a single bulk fetch from the CalendarAgent daemon (~0.4s for a full week) vs AppleScript (~65s). The source lives at `~/.claude/skills/time-entry/pull_calendar.swift` — edit and recompile there if you need changes.
+> **Performance note:** Uses a Swift + EventKit binary that is compiled locally on first use. EventKit does a single bulk fetch from the CalendarAgent daemon (~0.4s for a full week) vs AppleScript (~65s). The source lives at `~/.claude/skills/time-entry/pull_calendar.swift`.
 
-**Check binary exists, compile if missing:**
+**Check binary exists; compile from source if missing:**
 
 ```bash
-test -x ~/.claude/skills/time-entry/pull_calendar && echo "binary_ok" || (
-  echo "Compiling calendar binary..." &&
+if test -x ~/.claude/skills/time-entry/pull_calendar; then
+  echo "binary_ok"
+elif command -v swiftc &>/dev/null; then
+  echo "Compiling pull_calendar (first use)..."
   swiftc ~/.claude/skills/time-entry/pull_calendar.swift \
-         -o ~/.claude/skills/time-entry/pull_calendar &&
-  echo "compiled_ok"
-)
+         -o ~/.claude/skills/time-entry/pull_calendar \
+    && echo "compiled_ok" || echo "compile_failed"
+else
+  echo "swiftc_missing"
+fi
 ```
+
+If the output is `swiftc_missing`, tell the user:
+> "The calendar import feature requires Xcode Command Line Tools. Install with:
+> `xcode-select --install`
+> Then try again."
+Do not proceed without the binary.
 
 **Run it** — replace WEEK_START (Monday, e.g. 2026-03-30) and WEEK_END (Saturday, e.g. 2026-04-04):
 

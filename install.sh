@@ -47,20 +47,6 @@ install_from_dir() {
   done
   cp "$src/timetracker" "$SKILL_DIR/timetracker"
   chmod +x "$SKILL_DIR/timetracker"
-  compile_pull_calendar
-}
-
-# Compile pull_calendar from Swift source. Locally-compiled binaries bypass
-# Gatekeeper; distributing a pre-built Swift binary would require code signing.
-compile_pull_calendar() {
-  if command -v swiftc &>/dev/null; then
-    info "Compiling pull_calendar (Swift/EventKit)..."
-    swiftc "$SKILL_DIR/pull_calendar.swift" -o "$SKILL_DIR/pull_calendar" 2>/dev/null \
-      && ok "pull_calendar compiled." \
-      || warn "pull_calendar compile failed — calendar import feature unavailable."
-  else
-    warn "swiftc not found — skipping pull_calendar. Install Xcode Command Line Tools to enable calendar import."
-  fi
 }
 
 # ── Dev mode: symlink skill/ and build in place ───────────────────────────────
@@ -71,7 +57,6 @@ if [[ "$MODE" == "dev" ]]; then
   ln -s "$REPO_DIR/skill" "$SKILL_DIR"
   info "Building Go binary..."
   (cd "$REPO_DIR/go-src" && go build -o ../skill/timetracker .)
-  compile_pull_calendar
   ok "Installed (dev/symlink). Binary: $("$SKILL_DIR/timetracker" --version)"
   exit 0
 fi
