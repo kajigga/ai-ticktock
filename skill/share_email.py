@@ -5,14 +5,22 @@
 #   SCREENSHOT_PATH  Optional path to a PNG image to embed as a preview
 #                    (e.g. a screenshot of what the weekly report email looks like).
 #
-# Saves directly to the Drafts folder of the ServiceNow (Exchange) mailbox in
-# Mail.app via AppleScript, with sender set to kevin.hansen@servicenow.com.
+# Reads mail_app from ~/.config/timetracker.json ("Microsoft Outlook" or "Mail").
+# Outlook: opens a compose window via AppleScript (HTML renders natively).
+# Mail:    opens a compose window via .eml — press ⌘S to save to ServiceNow Drafts.
 
-import base64, os, subprocess, sys
+import base64, json, os, subprocess, sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 SENDER = 'kevin.hansen@servicenow.com'
+
+# ── Read mail_app from config (falls back to Mail if config missing) ──────────
+config_path = os.path.expanduser('~/.config/timetracker.json')
+mail_app = 'Mail'
+if os.path.exists(config_path):
+    with open(config_path) as f:
+        mail_app = json.load(f).get('mail_app', 'Mail')
 
 # ── Color palette (ServiceNow brand) ─────────────────────────────────────────
 SN_DARK   = '#293E40'
@@ -88,22 +96,41 @@ html_path = '/tmp/share_email_body.html'
 with open(html_path, 'w', encoding='utf-8') as f:
     f.write(html)
 
-# ── Build .eml and open as compose window ────────────────────────────────────
-# Opening a .eml with X-Unsent:1 renders HTML properly in Mail's compose window.
-# Mail matches the From address to the Exchange account, so pressing ⌘S will
-# save the draft to the ServiceNow mailbox's Drafts folder.
-subject = 'AI-powered time tracking skill for Claude Code / opencode'
+# ── Open draft in configured mail app ────────────────────────────────────────
+subject      = 'AI-powered time tracking skill for Claude Code / opencode'
+safe_subject = subject.replace('\\', '\\\\').replace('"', '\\"')
+safe_sender  = SENDER.replace('"', '\\"')
 
-msg = MIMEMultipart('alternative')
-msg['Subject']  = subject
-msg['From']     = SENDER
-msg['To']       = SENDER
-msg['X-Unsent'] = '1'
-msg.attach(MIMEText(html, 'html', 'utf-8'))
+if mail_app == 'Microsoft Outlook':
+    # Outlook's AppleScript `content` property accepts HTML directly, so we
+    # read the body from the temp file (already written above) and create a
+    # compose window. The recipient list is left empty for the user to fill in.
+    script_path = '/tmp/share_email_draft.applescript'
+    with open(script_path, 'w') as f:
+        f.write(f'''set htmlContent to do shell script "cat {html_path}"
+tell application "Microsoft Outlook"
+    activate
+    set theMsg to make new outgoing message with properties {{subject:"{safe_subject}", content:htmlContent}}
+    make new to recipient at theMsg with properties {{email address:{{address:"{safe_sender}"}}}}
+    open theMsg
+end tell
+''')
+    subprocess.run(['osascript', script_path])
+    print(f'Draft opened in Microsoft Outlook.')
+else:
+    # Mail.app: write a .eml with X-Unsent so it opens as a compose window
+    # with HTML rendered. Mail matches From to the Exchange account, so ⌘S
+    # saves the draft to the ServiceNow Drafts folder.
+    msg = MIMEMultipart('alternative')
+    msg['Subject']  = subject
+    msg['From']     = SENDER
+    msg['To']       = SENDER
+    msg['X-Unsent'] = '1'
+    msg.attach(MIMEText(html, 'html', 'utf-8'))
 
-eml_path = '/tmp/share_email_draft.eml'
-with open(eml_path, 'w', encoding='utf-8') as f:
-    f.write(msg.as_string())
+    eml_path = '/tmp/share_email_draft.eml'
+    with open(eml_path, 'w', encoding='utf-8') as f:
+        f.write(msg.as_string())
 
-subprocess.run(['open', '-a', 'Mail', eml_path])
-print(f'Draft opened in Mail — add recipients and press ⌘S to save to {SENDER} Drafts.')
+    subprocess.run(['open', '-a', 'Mail', eml_path])
+    print(f'Draft opened in Mail — add recipients and press ⌘S to save to {SENDER} Drafts.')
