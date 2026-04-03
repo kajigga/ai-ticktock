@@ -25,8 +25,9 @@ func main() {
 	s := storage.New(cfg.DataFile)
 
 	app := &cli.Command{
-		Name:  "timetracker",
-		Usage: "Time tracking CLI - track your work hours",
+		Name:    "timetracker",
+		Usage:   "Time tracking CLI - track your work hours",
+		Version: "1.0.0",
 		Description: `A simple time tracking application that stores your time entries locally in JSON.
 
 QUICK START:
