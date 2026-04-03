@@ -18,12 +18,10 @@ set -euo pipefail  # exit on error, undefined vars, or pipe failures
 REPO="kajigga/ai-ticktock"
 SKILL_DIR="$HOME/.claude/skills/time-entry"  # where Claude Code looks for skills
 
-# ── Colour helpers ────────────────────────────────────────────────────────────
-GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
-info() { echo -e "${GREEN}→${NC} $*"; }
-warn() { echo -e "${YELLOW}!${NC} $*"; }
-die()  { echo -e "${RED}✗${NC} $*" >&2; exit 1; }
-ok()   { echo -e "${GREEN}✓${NC} $*"; }
+info() { echo "→ $*"; }
+warn() { echo "! $*"; }
+die()  { echo "error: $*" >&2; exit 1; }
+ok()   { echo "✓ $*"; }
 
 echo ""
 echo "  ai-ticktock · time-entry skill installer"
