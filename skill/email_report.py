@@ -117,6 +117,9 @@ subject    = f"Weekly Time Report \u2014 Week of {week_start_dt.strftime('%b %-d
 html = f"""<html><body style="font-family:Calibri,Arial,sans-serif;font-size:14px;color:#222;max-width:600px">
 <p>Hi,</p>
 <p>Here's my time report for the week of <b>{week_label}</b>.</p>
+<div style="background:{SN_LIGHT};border-left:4px solid {SN_GREEN};border-radius:0 4px 4px 0;padding:12px 16px;color:#2a3a2b;line-height:1.6;font-size:13px;margin-bottom:24px">
+  {summary}
+</div>
 <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:{SN_DARK};margin-bottom:20px;width:100%">
   <tr>
     <td style="padding:14px 20px;color:white;text-align:center"><div style="font-size:10px;letter-spacing:1.5px;opacity:.65">TOTAL</div><div style="font-size:26px;font-weight:bold;color:{SN_GREEN}">{fmt(total)}</div></td>
@@ -140,10 +143,6 @@ html = f"""<html><body style="font-family:Calibri,Arial,sans-serif;font-size:14p
     <th style="padding:8px 14px;text-align:left;font-size:12px;font-weight:600;letter-spacing:.5px">Projects</th>
   </tr>{day_rows}
 </table>
-<p style="font-size:10px;font-weight:bold;letter-spacing:1.5px;color:{SN_DARK};margin-bottom:6px">SUMMARY</p>
-<div style="background:{SN_LIGHT};border-left:4px solid {SN_GREEN};border-radius:0 4px 4px 0;padding:12px 16px;color:#2a3a2b;line-height:1.6;font-size:13px;margin-bottom:24px">
-  {summary}
-</div>
 <p>Thanks,<br>Kevin</p>
 </body></html>"""
 
